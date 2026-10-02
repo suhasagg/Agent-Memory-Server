@@ -1,0 +1,16 @@
+services:
+ postgres:
+  image: pgvector/pgvector:pg17
+  environment: {POSTGRES_USER: memory, POSTGRES_PASSWORD: memory, POSTGRES_DB: memory}
+  healthcheck: {test: ["CMD-SHELL", "pg_isready -U memory"], interval: 5s, timeout: 3s, retries: 20}
+  volumes: ["pg:/var/lib/postgresql/data", "./migrations/001_init.sql:/docker-entrypoint-initdb.d/001.sql:ro"]
+ redis:
+  image: redis:7.4-alpine
+  command: ["redis-server","--appendonly","yes","--appendfsync","everysec"]
+  volumes: ["redis:/data"]
+ api:
+  build: .
+  environment: {DATABASE_URL: postgresql+asyncpg://memory:memory@postgres:5432/memory, REDIS_URL: redis://redis:6379/0, API_KEY: dev-change-me}
+  ports: ["8080:8080"]
+  depends_on: [postgres,redis]
+volumes: {pg: {}, redis: {}}

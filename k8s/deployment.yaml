@@ -1,0 +1,15 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: agent-memory-server}
+spec:
+ replicas: 3
+ selector: {matchLabels: {app: agent-memory-server}}
+ template:
+  metadata: {labels: {app: agent-memory-server}}
+  spec:
+   containers:
+   - name: api
+     image: agent-memory-server:1.0.0
+     ports: [{containerPort: 8080}]
+     readinessProbe: {httpGet: {path: /healthz, port: 8080}, initialDelaySeconds: 3, periodSeconds: 5}
+     resources: {requests: {cpu: 250m, memory: 256Mi}, limits: {cpu: "2", memory: 1Gi}}
